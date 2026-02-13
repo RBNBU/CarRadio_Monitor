@@ -38,5 +38,7 @@ Een volledig geïsoleerd segment voor de SQL-server. Hier draaien de onderhoudst
 * **Ruben Buelens**
 
 ---
-![Jeep Wrangler](/schema.png)
+<div align="center">
+  <img src="schema.png" style="background-color: black; padding: 10px; border-radius: 5px;" alt="Vehicle Tracking">
+</div>
 *Project ontwikkeld in het kader van Practice Enterprise.*
