@@ -38,4 +38,5 @@ Een volledig geïsoleerd segment voor de SQL-server. Hier draaien de onderhoudst
 * **Ruben Buelens**
 
 ---
+![Jeep Wrangler](https://jeepjamboreeusa.com/wp-content/uploads/2022/04/midland-jeep-exterior.jpg)
 *Project ontwikkeld in het kader van Practice Enterprise.*
