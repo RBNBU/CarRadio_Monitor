@@ -38,5 +38,5 @@ Een volledig geïsoleerd segment voor de SQL-server. Hier draaien de onderhoudst
 * **Ruben Buelens**
 
 ---
-![Schema werking](schema.png)
+![Schema werking](Documentation/schema.png)
 *Project ontwikkeld in het kader van Practice Enterprise.*
