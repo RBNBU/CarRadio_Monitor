@@ -45,14 +45,67 @@ int callsignCount = 0;
 //Function declarations
 void loadCallsigns(); //Function used to load callsings from text file
 int matchCallsign(const char *incoming, const char *allowedFilter); //Check if callsign matches to an allowed one
-void on_MQTT_Message(struct mosquitto *p_mosq, void *obj, const struct mosquitto_message *message); //When a MQTT message arrives
+void on_MQTT_Message(struct mosquitto *p_mosq, void *obj, const struct mosquitto_message *p_message); //When a MQTT message arrives
 void on_MQTT_Connect(struct mosquitto *p_mosq, void *obj, int rc);
 
 /*-------------------------------------------------------------------------------*/
 
 int main()
 {
-    
+    // declare variables
+    struct mosquitto *mosq = NULL;
+    int mosquitto_status;
+
+    // load callsigns into array;
+    loadCallsigns();
+    if (callsignCount == 0) // check for empty callsign file
+    {
+        fprintf(stderr, "No callsigns found in file!\nFile: %s\n", CALLSIGN_FILE);
+        return -1;
+    }
+
+    // initialize mosquitto library
+    mosquitto_lib_init();
+
+    // create new MQTT client
+    mosq = mosquitto_new("APRS_Filter_C", false, NULL);
+    /*
+    station id: APRS_Filter_C
+    false: to make connection to broker persistent -> ex. broker sends missed packets after loss of connection
+    */
+    if(!mosq)
+    {
+        fprintf(stderr, "Error while creating MQTT instance");
+        return -1;
+    }
+
+    // Set Callbacks
+    mosquitto_connect_callback_set(mosq, on_MQTT_Connect);
+    mosquitto_message_callback_set(mosq, on_MQTT_Message);
+
+    // Connect to MQTT broker
+    if (mosquitto_connect(mosq, MQTT_SUB, MQTT_SUB_PORT, 60) != MOSQ_ERR_SUCCESS)
+    {
+        fprintf(stderr, "Error while connecting to MQTT Broker!");
+        return -1;
+    }
+
+    // print startup message
+    printf("Filter started!\nMQTT Sub: %s\nQOS: %d\n", MQTT_SUB_TOPIC, MQTT_SUB_QOS);
+    printf("Loaded %d callsigns from file!\n", callsignCount);
+    printf("\n<------------------------------>\n\n");
+
+    // start infinite loop to scan for messages
+    mosquitto_loop_forever(mosq, -1, 1); // auto-reconnects when needed
+
+    // cleanup code
+    if (allowedCallsigns != 0)
+    {
+        free(allowedCallsigns);
+    }
+
+    mosquitto_destroy(mosq);
+    mosquitto_lib_cleanup();
 
     return 0;
 }
@@ -87,6 +140,8 @@ void loadCallsigns()
         while((current_callsign != NULL) && (callsignCount < MAX_CALLSIGNS))
         {
             strncpy(allowedCallsigns[callsignCount], current_callsign, CALLSIGN_LEN - 1); // copy callsign into array
+            allowedCallsigns[callsignCount][CALLSIGN_LEN - 1] = '\0'; // add null terminator
+            
             callsignCount++;
             current_callsign = strtok(NULL, ";"); // remove separator: ";"
         }
@@ -137,21 +192,21 @@ allowedFilter: allowed callsign to compare with
 
 /*-------------------------------------------------------------------------------*/
 
-void on_MQTT_Message(struct mosquitto *p_mosq, void *obj, const struct mosquitto_message *message)
+void on_MQTT_Message(struct mosquitto *p_mosq, void *obj, const struct mosquitto_message *p_message)
 /* 
 p_mosq: pointer to MQTT client that connected
 obj: user data pointer
 message: pointer to MQTT message
 */
 {
-    if (message->payloadlen == 0) // if message is empty
+    if (p_message->payloadlen == 0) // if message is empty
     return;
     
     
     cJSON *json, *source;
     int matchFound = 0, i;
     
-    json = cJSON_Parse((char*)message->payload); // parse mqtt message
+    json = cJSON_Parse((char*)p_message->payload); // parse mqtt message
     if(json == NULL)
     {
         fprintf(stderr, "Error while parsing JSON!");
@@ -174,7 +229,7 @@ message: pointer to MQTT message
         if (matchFound)
         {
             printf("Match found!\nUser: %s\n\n", source->valuestring);
-            mosquitto_publish(p_mosq, NULL, MQTT_HOST_TOPIC, message->payloadlen, message->payload, MQTT_HOST_QOS, false); //send match to MQTT
+            mosquitto_publish(p_mosq, NULL, MQTT_HOST_TOPIC, p_message->payloadlen, p_message->payload, MQTT_HOST_QOS, false); //send match to MQTT
         }
     }
     
