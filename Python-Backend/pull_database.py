@@ -33,9 +33,9 @@ def get_now():
         cursor = conn.cursor(dictionary=True)
 
         # Take the latest row from the current_data table
-        query = "SELECT * FROM current_data ORDER BY Timestamp DESC LIMIT 1"
+        query = "SELECT * FROM current_data ORDER BY Timestamp DESC"
         cursor.execute(query)
-        data = cursor.fetchone()
+        data = cursor.fetchall()
 
         cursor.close()
         conn.close()
