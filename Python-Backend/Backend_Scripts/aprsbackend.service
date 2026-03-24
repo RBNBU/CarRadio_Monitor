@@ -1,0 +1,15 @@
+[Unit]
+Description=Start all backend scripts
+After=network.target
+
+[Service]
+EnvironmentFile=/home/vm2/.aprs_env
+Environment=PYTHONUNBUFFERED=1
+WorkingDirectory=/home/vm2/Code/Python-Backend/Project_PE/Python-Backend/Backend_Scripts
+ExecStart=/bin/bash /home/vm2/Code/Python-Backend/Project_PE/Python-Backend/Backend_Scripts/Start_backend.sh
+
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
