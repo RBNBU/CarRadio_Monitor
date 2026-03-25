@@ -204,7 +204,7 @@ message: pointer to MQTT message
 */
 {
     if (p_message->payloadlen == 0) // If message is empty
-    return;
+        return;
     
     
     cJSON *json, *source;
@@ -232,8 +232,29 @@ message: pointer to MQTT message
         
         if (matchFound)
         {
-            printf("Match found!\nUser: %s\n\n", source->valuestring);
-            mosquitto_publish(p_mosq, NULL, MQTT_HOST_TOPIC, p_message->payloadlen, p_message->payload, MQTT_HOST_QOS, false); //send match to MQTT
+            // Create a copy of the string, the copy will be stripped of the SSID (e.g. -9)
+            char strippedCallsign[CALLSIGN_LEN];
+
+            strncpy(strippedCallsign, source->valuestring, CALLSIGN_LEN - 1);
+            strippedCallsign[CALLSIGN_LEN - 1] = '\0'; // Ensure null termination in string
+
+            char *p_dashLocation = strchr(strippedCallsign, '-');
+            if (p_dashLocation != NULL) 
+            {
+                *p_dashLocation = '\0'; // Cut off string at SSID begin
+            }
+            
+            printf("Match found!\nOriginal User: %s | Forwarding as: %s\n\n", source->valuestring, strippedCallsign);
+            cJSON_ReplaceItemInObject(json, "source", cJSON_CreateString(strippedCallsign));
+
+            char *newPayload = cJSON_PrintUnformatted(json);
+            
+            if (newPayload != NULL) 
+            {
+                mosquitto_publish(p_mosq, NULL, MQTT_HOST_TOPIC, strlen(newPayload), newPayload, MQTT_HOST_QOS, false); // Publish modified message on MQTT broker
+                
+                free(newPayload);
+            }
         }
     }
     
