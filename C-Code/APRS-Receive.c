@@ -210,7 +210,13 @@ message: pointer to MQTT message
     cJSON *json, *source;
     int matchFound = 0, i;
     
-    json = cJSON_Parse((char*)p_message->payload); // Parse mqtt message
+    // Convert MQTT byte array to null-terminated string
+    char *payload_str = malloc(p_message->payloadlen + 1);
+    memcpy(payload_str, p_message->payload, p_message->payloadlen);
+    payload_str[p_message->payloadlen] = '\0';
+    
+    json = cJSON_Parse(payload_str); 
+    free(payload_str); // Free the temp string immediately
     if(json == NULL)
     {
         fprintf(stderr, "Error while parsing JSON!\n");
