@@ -15,39 +15,56 @@ def handle_send():
     return jsonify({"status": "sent"})
 
 def listen_to_ax25():
-    process = subprocess.Popen(['axlisten', '-a'], stdout=subprocess.PIPE, universal_newlines=True)
+    # 'stdbuf -oL' forces Linux to stream the data instantly
+    process = subprocess.Popen(['stdbuf', '-oL', 'axlisten', '-a'], stdout=subprocess.PIPE, universal_newlines=True)
     current_sender = ""
     current_dest = ""
     
     for line in process.stdout:
         line = line.strip()
+        
         # Catch header line
         if line.startswith("radio: fm"):
             parts = line.split()
             try:
                 current_sender = parts[2]
                 current_dest = parts[4]
-            except: pass
-            
+            except: 
+                pass
+                
         # Catch payload line after header line
         elif current_sender and line and not line.startswith("radio:"):
-            # Stitch together to standard TNC2 format
             tnc2_packet = f"{current_sender}>{current_dest}:{line}"
             try:
                 parsed = aprslib.parse(tnc2_packet)
-                parsed['local_time'] = time.strftime('%H:%M:%S')
-                received_packets.insert(0, parsed)
-                if len(received_packets) > 100: received_packets.pop()
-            except Exception: pass
-            
+                
+                # Format exactly how script.js expects it
+                formatted_packet = {
+                    'callsign': parsed.get('from', 'UNKNOWN'),
+                    'lat': parsed.get('latitude', 'N/A'),
+                    'lon': parsed.get('longitude', 'N/A'),
+                    'comment': parsed.get('comment', ''),
+                    'timestamp': time.time()
+                }
+                
+                received_packets.insert(0, formatted_packet)
+                if len(received_packets) > 100: 
+                    received_packets.pop()
+                    
+            except Exception:
+                pass
+                
             # Reset next packet
             current_sender = ""
 
-@app.route('/api/packets')
-def get_packets(): return jsonify(received_packets)
+# Matches the frontend fetch request!
+@app.route('/api/data')
+def get_packets(): 
+    return jsonify(received_packets)
 
 @app.route('/')
-def index(): return render_template('index.html')
+def index(): 
+    return render_template('index.html')
 
 if __name__ == '__main__':
     threading.Thread(target=listen_to_ax25, daemon=True).start()
