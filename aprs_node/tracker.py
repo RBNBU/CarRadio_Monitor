@@ -1,6 +1,7 @@
 import time
 import subprocess
 import math
+import os
 from gps import gps, WATCH_ENABLE, WATCH_NEWSTYLE
 from gpiozero import Button
 
@@ -105,6 +106,18 @@ if __name__ == '__main__':
                 current_speed_knots = getattr(report, 'speed', 0.0) * 1.94384
                 current_alt_m = getattr(report, 'alt', 0.0)
                 
+                # --- WEB DASHBOARD TRIGGER CHECK ---
+                if os.path.exists('/tmp/aprs_trigger_0'):
+                    send_aprs_packet(comment="0")
+                    try: os.remove('/tmp/aprs_trigger_0')
+                    except: pass
+                    
+                if os.path.exists('/tmp/aprs_trigger_1'):
+                    send_aprs_packet(comment="1")
+                    try: os.remove('/tmp/aprs_trigger_1')
+                    except: pass
+                # -----------------------------------
+
                 if current_lat == 0.0:
                     continue
                     
