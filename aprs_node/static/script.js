@@ -69,7 +69,7 @@ inputMessage.addEventListener('input', () => {
     charCounter.innerText = inputMessage.value.length;
 });
 
-// Fire the Packet!
+// Send packet
 btnSendTx.addEventListener('click', () => {
     // Force callsign to uppercase, remove extra spaces
     const target = inputTarget.value.trim().toUpperCase();
@@ -112,3 +112,43 @@ btnSendTx.addEventListener('click', () => {
         btnSendTx.disabled = false;
     });
 });
+
+// --- Location Beacon Trigger Logic ---
+document.getElementById('btn-beacon-0').addEventListener('click', () => sendLocationBeacon('0'));
+document.getElementById('btn-beacon-1').addEventListener('click', () => sendLocationBeacon('1'));
+
+function sendLocationBeacon(commentStr) {
+    const btn = document.getElementById(`btn-beacon-${commentStr}`);
+    const originalText = btn.innerText;
+    
+    // UI Feedback
+    btn.innerText = "QUEUING...";
+    btn.disabled = true;
+
+    fetch('/beacon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ comment: commentStr })
+    })
+    .then(response => response.json())
+    .then(data => {
+        setTimeout(() => {
+            btn.innerText = "SENT!";
+            btn.style.background = "var(--accent-green)";
+            btn.style.color = "#000";
+            
+            // Reset button after 2 seconds
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.style.background = ""; 
+                btn.style.color = "";
+                btn.disabled = false;
+            }, 2000);
+        }, 500);
+    })
+    .catch(err => {
+        alert("Failed to queue beacon. Check Pi connection.");
+        btn.innerText = originalText;
+        btn.disabled = false;
+    });
+}
