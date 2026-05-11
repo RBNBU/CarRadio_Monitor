@@ -1,4 +1,11 @@
-:root {
+/*
+    LAYOUT : DEFAULT LAYOUT
+    GEMAAKT DOOR: JASPER ARTOOS , RUBEN BUELENS
+*/
+
+/* GLOBAL VARIABLES */
+:root 
+{
     --bg-main: #0f172a;
     --bg-card: #1e293b;
     --accent: #3b82f6;
@@ -7,7 +14,9 @@
     --border: #334155;
 }
 
-body {
+/* BASE STYLES */
+body 
+{
     background-color: var(--bg-main);
     color: var(--text-main);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -16,7 +25,25 @@ body {
     height: 100vh;
 }
 
-header {
+strong 
+{
+    color: var(--text-main);
+    font-weight: 600;
+}
+
+span 
+{
+    color: var(--text-muted);
+}
+
+a 
+{
+    color: var(--accent);
+}
+
+/* LAYOUT NAVIGATION BAR */
+header 
+{
     background-color: #1e293b;
     border-bottom: 1px solid var(--border);
     padding: 1rem 2rem;
@@ -26,29 +53,36 @@ header {
     z-index: 1000;
 }
 
-.brand-header h1 {
+.brand-header h1 
+{
     font-size: 1.25rem;
     font-weight: 700;
     color: var(--accent);
 }
 
-nav ul {
+nav ul 
+{
     display: flex;
     gap: 1.5rem;
 }
 
-nav a {
+nav a 
+{
     color: var(--text-muted);
     text-decoration: none;
     font-weight: 500;
     transition: color 0.2s;
 }
 
-nav a:hover, nav a.active {
+nav a:hover, 
+nav a.active 
+{
     color: var(--text-main);
 }
 
-.card {
+/* LAYOUT UI COMPONENTS*/
+.card 
+{
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 12px;
@@ -57,7 +91,8 @@ nav a:hover, nav a.active {
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
-.card-title {
+.card-title 
+{
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -66,31 +101,25 @@ nav a:hover, nav a.active {
     font-weight: 600;
 }
 
-strong {
-    color: var(--text-main);
-    font-weight: 600;
-}
-
-span {
-    color: var(--text-muted);
-}
-
-a {
-    color: var(--accent);
-}
-
-@media (max-width: 768px) {
-    body {
+/* LAYOUT SMARTPHONE */
+@media (max-width: 768px) 
+{
+    body 
+    {
         overflow-y: auto;
         height: auto;
         min-height: 100vh;
     }
-    header {
+
+    header 
+    {
         flex-direction: column;
         padding: 1rem;
         gap: 1rem;
     }
-    nav ul {
+
+    nav ul 
+    {
         gap: 1rem;
         justify-content: center;
     }
