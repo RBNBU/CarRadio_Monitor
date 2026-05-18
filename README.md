@@ -83,5 +83,5 @@ Plaats de inhoud van de map `Webserver` in de web-directory van Nginx of Apache 
 * **Ruben Buelens** (Hardware, C-programmatie & Voertuig-integratie)
 
 ---
-![Schema werking](Documentation/schema.png)
+![Schema werking](schema.png)
 *Gerealiseerd in het kader van het vak Practice Enterprise ICT aan de Thomas More Hogeschool (Campus De Nayer).*
